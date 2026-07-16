@@ -18,7 +18,6 @@ qna_data <- rjd3bench::qna_data
 Y <- ts(qna_data$B1G_Y_data[, "B1G_FF"], frequency = 1, start = c(2009, 1))
 x <- ts(qna_data$TURN_Q_data[, "TURN_INDEX_FF"], frequency = 4, start = c(2009, 1))
 td <- rjd3bench::temporal_disaggregation(Y, indicators = x)
-
 y <- td$estimation$disagg # the disaggregated series
 print(td)
 
