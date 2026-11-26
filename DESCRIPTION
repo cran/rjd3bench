@@ -1,7 +1,7 @@
 Type: Package
 Package: rjd3bench
 Title: Temporal Disaggregation and Benchmarking in 'JDemetra+' 3.x
-Version: 3.1.3
+Version: 3.2.0
 Authors@R: c(
       person("Jean", "Palate", email = "palatejean@gmail.com", role = "aut"),
       person("Corentin", "Lemasson", email ="corentin.lemasson@nbb.be", role = c("aut", "cre")),
@@ -10,32 +10,35 @@ Authors@R: c(
   )
 Description: Interface to 'JDemetra+' 3.x (<https://github.com/jdemetra>) 
     time series analysis software. It provides a variety of methods for 
-    temporal disaggregation & interpolation, benchmarking, reconciliation 
-    and calendarization. It incorporates statistical methods described in 
-    the latest European Statistical System (ESS) guidelines on temporal 
-    disaggregation, benchmarking, and reconciliation (2018 edition). The package 
-    implements highly efficient algorithms for fast and reliable computation.
+    temporal disaggregation & interpolation, benchmarking, reconciliation & 
+    multivariate temporal disaggregation and calendarization. 
+    It incorporates statistical methods described in the latest European 
+    Statistical System (ESS) guidelines on temporal disaggregation, 
+    benchmarking, and reconciliation (2018 edition). The package implements 
+    highly efficient algorithms for fast and reliable computation.
 License: EUPL
 URL: https://github.com/rjdverse/rjd3bench,
         https://rjdverse.github.io/rjd3bench/
 BugReports: https://github.com/rjdverse/rjd3bench/issues
 Depends: R (>= 4.1.0)
-Imports: rJava (>= 1.0-6), rjd3jars (>= 0.0.5), rjd3toolkit (>= 3.8.0),
-        RProtoBuf (>= 0.4.25), stats, graphics
+Imports: rJava (>= 1.0-6), rjd3jars (>= 0.0.6), rjd3toolkit (>= 3.9.0),
+        stats, graphics
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 SystemRequirements: Java (>= 21)
 Collate: 'utils.R' 'adl.R' 'benchmark.R' 'calendarization.R'
-        'deprecated.R' 'mbdenton.R' 'print.R' 'tempdisagg.R' 'zzz.R'
+        'deprecated.R' 'mbdenton.R' 'print.R' 'rjd3bench-package.R'
+        'tempdisagg.R' 'zzz.R'
 LazyData: TRUE
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-07-13 09:03:04 UTC; lemasso
+Packaged: 2026-11-26 10:02:05 UTC; lemasso
 Author: Jean Palate [aut],
   Corentin Lemasson [aut, cre],
   Tanguy Barthelemy [ctb, art],
   Nikolina Rizanovska [ctb]
 Maintainer: Corentin Lemasson <corentin.lemasson@nbb.be>
 Repository: CRAN
-Date/Publication: 2026-07-16 08:40:02 UTC
+Date/Publication: 2026-11-26 12:10:02 UTC

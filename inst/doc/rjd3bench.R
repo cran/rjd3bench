@@ -14,20 +14,23 @@ Retail <- rjd3toolkit::Retail
 qna_data <- rjd3bench::qna_data
 
 ## -----------------------------------------------------------------------------
-# Example 1: TD using Chow-Lin to disaggregate annual value added in construction sector using a quarterly indicator
+# Example 1: Temporal disaggregation of annual value added in the construction sector using the
+# Chow-Lin method and a quarterly indicator
 Y <- ts(qna_data$B1G_Y_data[, "B1G_FF"], frequency = 1, start = c(2009, 1))
 x <- ts(qna_data$TURN_Q_data[, "TURN_INDEX_FF"], frequency = 4, start = c(2009, 1))
 td <- rjd3bench::temporal_disaggregation(Y, indicators = x)
 y <- td$estimation$disagg # the disaggregated series
 print(td)
 
-# Example 2: interpolation using Fernandez without indicator when the last value (default) of the interpolated series is the one consistent with the low frequency series.
+# Example 2: Interpolation using the Fernandez method without indicators, when the low-frequency
+# observations corresponds to the last value of the interpolated series (which is the default)
 Y <- rjd3toolkit::aggregate(rjd3toolkit::Retail$RetailSalesTotal, 1)
 ti <- temporal_interpolation(Y, indicators = NULL, model = "Rw", freq = 4, nfcsts = 2)
 y <- ti$estimation$interp # the interpolated series
 
-# Example 3: TD of atypical frequency data using Fernandez with an offset of 1 period
-Y <- c(500,510,525,520)
+# Example 3: Temporal disaggregation of atypical-frequency data using the Fernandez method
+# with a one-period offset
+Y <- c(500, 510, 525, 520)
 x <- c(97,
        98, 98.5, 99.5, 104, 99,
        100, 100.5, 101, 105.5, 103,
@@ -36,8 +39,9 @@ x <- c(97,
 td_raw <- temporal_disaggregation_raw(Y, indicators = x, startoffset = 1,  model = "Rw", freqratio = 5)
 y <- td_raw$estimation$disagg # the disaggregated series
 
-# Example 4: interpolation of atypical frequency data using Fernandez without offset, when the first value of the interpolated  series is the one consistent with the low frequency series.
-Y <- c(500,510,525,520)
+# Example 4: Interpolation of atypical frequency data using the Fernandez method without offset,
+# when the low-frequency observations corresponds to the first value of the interpolated series
+Y <- c(500, 510, 525, 520)
 x <- c(490, 492.5, 497.5, 520, 495,
        500, 502.5, 505, 527.5, 515,
        522.5, 517.5, 522.5, 545, 520,
@@ -52,7 +56,7 @@ Y <- ts(qna_data$B1G_Y_data[, "B1G_FF"], frequency = 1, start = c(2009, 1))
 x <- ts(qna_data$TURN_Q_data[, "TURN_INDEX_FF"], frequency = 4, start = c(2009, 1))
 td_mbd <- denton_modelbased(Y, x, outliers = list("2020-01-01" = 100, "2020-04-01" = 100))
 
-y_mbd <- td_mbd$estimation$disagg
+y_mbd <- td_mbd$estimation$disagg # the disaggregated series
 print(td_mbd)
 
 ## -----------------------------------------------------------------------------
@@ -107,7 +111,7 @@ y_den1 <- denton(s = x, t = Y) # denton PFD (= the default)
 y_den2 <- denton(s = x, t = Y, d = 2, mul = FALSE) # denton ASD
 
 # Example 2: use of of Denton method for benchmarking atypical frequency data
-Y <- c(500,510,525,520)
+Y <- c(500, 510, 525, 520)
 x <- c(97, 98, 98.5, 99.5, 104,
        99, 100, 100.5, 101, 105.5,
        103, 104.5, 103.5, 104.5, 109,
@@ -135,7 +139,7 @@ y_cs2 <- cubicspline(s = x, t = Y) # with a high frequency preliminary series to
 ## -----------------------------------------------------------------------------
 # Example: use Cholette method for benchmarking
 Y <- ts(qna_data$B1G_Y_data[, "B1G_HH"], frequency = 1, start = c(2009, 1))
-xn <- c(denton(t = Y, nfreq = 4) + rnorm(n = length(Y)*4, mean = 0, sd = 10), 5750, 5800)
+xn <- c(denton(t = Y, nfreq = 4) + rnorm(n = length(Y) * 4, mean = 0, sd = 10), 5750, 5800)
 x <- ts(xn, start = start(Y), frequency = 4)
 
 y_cho1 <- cholette(s = x, t = Y, rho = 0.729, lambda = 1, bias = "Multiplicative")  # proportional benchmarking
@@ -157,21 +161,105 @@ Y2 <- ts(c(80.0, 81.2), frequency = 1, start = c(2010, 1))
 Y3 <- ts(c(8.0, 8.1), frequency = 1, start = c(2010, 1))
 
 ### check consistency between temporal and contemporaneous constraints
-lfs <- cbind(Y1,Y2,Y3)
+lfs <- cbind(Y1, Y2, Y3)
 as.numeric(rowSums(lfs) - stats::aggregate.ts(z)) # should all be 0
 
 data_list <- list(x1 = x1, x2 = x2, x3 = x3, z = z, Y1 = Y1, Y2 = Y2, Y3 = Y3)
 tc <- c("Y1 = sum(x1)", "Y2 = sum(x2)", "Y3 = sum(x3)") # temporal constraints
-cc <- c("z = x1+x2+x3") # (binding) contemporaneous constraint
-cc_nb <- c("0 = x1+x2+x3-z") # non-binding contemporaneous constraint
+cc <- "z = x1+x2+x3" # (binding) contemporaneous constraint
+cc_nb <- "0 = x1+x2+x3-z" # non-binding contemporaneous constraint
 
 rec1 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc) # default values for rho and lambda
 print(rec1)
-rec2 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc, rho = .5, lambda = .5) # trade-off values for rho and lambda
+rec2 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc, rho = 0.5, lambda = 0.5) # trade-off values for rho and lambda
 rec3 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc, rho = 1) # Denton
 rec4 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc, rho = 0.729) # Cholette
 rec5 <- multivariatecholette(xlist = data_list, tcvector = NULL, ccvector = cc) # no temporal constraints
 rec6 <- multivariatecholette(xlist = data_list, tcvector = tc, ccvector = cc_nb) # non-binding contemporaneous constraint
+
+## -----------------------------------------------------------------------------
+# Example: multivariate Chow-Lin and Fernandez models
+
+# Low-frequency data
+Y1 <- ts(c(30.0, 30.6, 31.2, 31.6), frequency = 1, start = c(2010, 1))
+Y2 <- ts(c(80.0, 81.2, 82.5, 82.6), frequency = 1, start = c(2010, 1))
+Y3 <- ts(c(8.0, 8.1, 8.2, 8.2), frequency = 1, start = c(2010, 1))
+lf_series <- list(y1 = Y1, y2 = Y2, y3 = Y3)
+
+# Contemporaneous constraint
+z <- ts(c(27.1, 29.8, 29.9, 31.2, 29.4, 27.9, 30.9, 31.7, 29.2, 30.2, 30.6, 31.9, 29.3, 30.4, 30.7, 32.0), frequency = 4, start = c(2010, 1))
+
+# High-frequency indicators
+x11 <- ts(c(7.0, 7.2, 8.1, 7.5, 8.5, 7.8, 8.1, 8.4, 8.6, 7.8, 8.0, 8.3, 8.7, 7.9, 8.0, 8.6), frequency = 4, start = c(2010, 1))
+x12 <- ts(c(18.0, 19.5, 19.0, 19.7, 18.5, 19.0, 20.3, 20.0, 18.6, 19.5, 20.4, 20.1, 18.7, 19.1, 20.4, 20.8), frequency = 4, start = c(2010, 1))
+x2 <- NULL
+x3 <- ts(c(1.5, 1.8, 2.0, 2.5, 2.0, 1.5, 1.7, 2.1, 2.1, 1.6, 1.6, 2.2, 2.3, 1.7, 1.9, 2.3), frequency = 4, start = c(2010, 1))
+indic_series <- list(y1 = list(x11, x12), y2 = NULL, y3 = x3)
+
+# Check consistency between temporal and contemporaneous constraints
+as.numeric(rowSums(cbind(Y1, Y2, Y3)) - stats::aggregate.ts(z)) # should all be 0
+
+# Estimate models and get results
+
+## Mix Chow-Lin and Fernandez definitions
+
+### with var-cov matrix estimated from the univariate models, assuming zero covariances
+mtd1 <- multivariatechowlin(
+    series = lf_series,
+    constant = c(FALSE, FALSE, TRUE),
+    trend = c(FALSE, FALSE, FALSE),
+    indicators = indic_series,
+    ccseries = list(z = z),
+    ccdefinition = "z=y1+y2+y3",
+    freq = 4L,
+    rho = c(0.85, 1.0, 0.9),
+    var = "fromUnivariate",
+    var.includeCov = FALSE,
+    var.shrinkCov = FALSE
+)
+
+mtd1$estimation$var$vcov # variance-covariance matrix of the innovations
+do.call(cbind, mtd1$estimation$disagg) # disaggregated series
+
+### using a shrinkage estimator for covariance
+mtd2 <- multivariatechowlin(
+    series = lf_series,
+    constant = c(FALSE, FALSE, TRUE),
+    trend = c(FALSE, FALSE, FALSE),
+    indicators = indic_series,
+    ccseries = list(z = z),
+    ccdefinition = "z=y1+y2+y3",
+    freq = 4L,
+    rho = c(0.85, 1.0, 0.9),
+    var = "fromUnivariate",
+    var.includeCov = TRUE,
+    var.shrinkCov = TRUE
+)
+
+## Multivariate random walk model (multivariate Fernandez)
+
+### with var-cov matrix provided by the user
+mtd3 <- multivariatechowlin(
+    series = lf_series,
+    constant = FALSE,
+    trend = FALSE,
+    indicators = indic_series,
+    ccseries = list(z = z),
+    ccdefinition = "z=y1+y2+y3",
+    freq = 4L,
+    rho = 1.0,
+    var = "userDefined",
+    var.matrix = matrix(
+        c(
+            5, 2, 1,
+            2, 10, 2,
+            1, 2, 3
+        ),
+        nrow = 3,
+        byrow = TRUE
+    ),
+    rescale.variance = TRUE
+)
 
 ## -----------------------------------------------------------------------------
 # Example of calendarization (from Quenneville et al (2012))
@@ -181,7 +269,8 @@ obs <- list(
     list(start = "2009-02-18", end = "2009-03-17", value = 9000),
     list(start = "2009-03-18", end = "2009-04-14", value = 5000),
     list(start = "2009-04-15", end = "2009-05-12", value = 9500),
-    list(start = "2009-05-13", end = "2009-06-09", value = 7000))
+    list(start = "2009-05-13", end = "2009-06-09", value = 7000)
+)
 
 ## calendarization in absence of daily indicator values (or weights)
 cal_1 <- calendarization(obs, 12, end = "2009-06-30", dailyweights = NULL, stde = TRUE)
@@ -193,7 +282,7 @@ eyd_1 <- cal_1$edays
 print(cal_1)
 
 ## calendarization in presence of daily indicator values (or weights)
-x <- rep(c(1.0, 1.2, 1.8 , 1.6, 0.0, 0.6, 0.8), 19)
+x <- rep(c(1.0, 1.2, 1.8, 1.6, 0.0, 0.6, 0.8), 19)
 cal_2 <- calendarization(obs, 12, end = "2009-06-30", dailyweights = x, stde = TRUE)
 
 ym_2 <- cal_2$rslt
